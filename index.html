@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>课外课表 · 二年级</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --bg:#F5F3EE;
+    --card:#FFFFFF;
+    --ink:#2B2E33;
+    --muted:#7C8189;
+    --faint:#A6ABB3;
+    --line:#ECE9E1;
+    --line-strong:#E2DED3;
+    --accent:#E0783F;
+    --accent-soft:#FBF0E6;
+    --accent-deep:#C75B24;
+    --yu:#5277D8;   --yu-bg:#EDF1FC;
+    --eng:#7B6FDF;  --eng-bg:#F0EDFC;
+    --tiao:#3E9A5F; --tiao-bg:#EAF4ED;
+    --bian:#2C97B2; --bian-bg:#E7F3F6;
+    --free:#F7F5F0;
+    --today-bg:#F2EEE3;
+  }
+  html,body{background:var(--bg);color:var(--ink);}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .app{max-width:640px;margin:0 auto;padding:18px 14px 48px;}
+
+  /* ===== 顶栏 ===== */
+  .masthead{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .title{font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--ink);}
+  .title .sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:4px;letter-spacing:0;}
+  .datechip{
+    flex:none;display:inline-flex;align-items:center;gap:6px;
+    background:var(--card);border:1px solid var(--line-strong);border-radius:999px;
+    padding:8px 13px;font-size:12.5px;color:var(--muted);
+  }
+  .datechip b{font-weight:700;color:var(--ink);}
+
+  /* ===== 今日卡 ===== */
+  .today-card{
+    margin-top:16px;background:var(--card);
+    border:1px solid var(--line);border-radius:20px;padding:16px;
+    box-shadow:0 4px 16px rgba(60,50,30,.05);
+    display:flex;gap:14px;align-items:stretch;
+  }
+  .today-card .badge{
+    flex:none;width:56px;border-radius:14px;background:var(--accent);
+    color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    line-height:1.15;
+  }
+  .today-card .badge .w{font-size:11px;font-weight:600;opacity:.95;}
+  .today-card .badge .d{font-size:22px;font-weight:800;margin-top:2px;}
+  .today-card .body{flex:1;min-width:0;}
+  .today-card .body h2{font-size:14px;font-weight:700;color:var(--ink);}
+  .today-card .body .no-c{
+    margin-top:8px;font-size:13px;color:var(--accent-deep);line-height:1.7;
+  }
+  .today-card .body ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+  .today-card .body li{
+    display:flex;align-items:center;gap:10px;background:#FBF9F4;
+    border:1px solid var(--line);border-radius:12px;padding:9px 12px;
+  }
+  .today-card .body li .cname{font-size:13.5px;font-weight:700;color:var(--ink);flex:none;}
+  .today-card .body li .ctime{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600;}
+  .bar{width:4px;border-radius:2px;align-self:stretch;flex:none;}
+
+  /* ===== 图例 ===== */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:16px 2px 2px;font-size:12px;color:#5A5F66;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:3px;flex:none;}
+
+  /* ===== 星期导航 ===== */
+  .day-tabs{
+    display:flex;margin:14px 0 10px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:3px;
+  }
+  .day-tabs button{
+    flex:none;min-width:44px;height:44px;border-radius:12px;border:1px solid var(--line-strong);
+    background:var(--card);color:#5A5F66;font-size:13px;font-weight:600;
+    font-family:inherit;cursor:pointer;padding:0 14px;line-height:1;
+  }
+  .day-tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  /* ===== 课表 ===== */
+  .schedule-title{
+    display:flex;align-items:center;gap:8px;margin:12px 2px 10px;
+    font-size:14px;font-weight:700;color:var(--ink);
+  }
+  .schedule-title .pill{
+    font-size:11px;font-weight:500;color:var(--accent-deep);background:var(--accent-soft);
+    border-radius:999px;padding:3px 10px;
+  }
+  .schedule-title .hint{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:500;}
+  .scroll-wrap{
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border:1px solid var(--line-strong);border-radius:18px;background:var(--card);
+    box-shadow:0 2px 10px rgba(60,50,30,.04);
+  }
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:660px;table-layout:fixed;}
+  th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  th:last-child,td:last-child{border-right:none;}
+  /* 表头 */
+  thead th{
+    background:#FCFAF5;font-weight:700;padding:14px 4px;text-align:center;
+    color:#454A52;font-size:13px;position:relative;z-index:1;
+  }
+  thead th.today{background:var(--accent-soft);color:var(--accent-deep);}
+  thead th .w{font-size:13px;}
+  thead th .dnum{display:block;font-size:10.5px;font-weight:500;color:var(--faint);margin-top:3px;}
+  thead th.today .dnum{color:var(--accent-deep);opacity:.75;}
+  thead th.today .mark{
+    position:absolute;top:7px;left:50%;transform:translateX(-50%);
+    width:15px;height:15px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  }
+  /* 时间列固定 */
+  td.time, thead th.time-head{
+    position:sticky;left:0;z-index:3;
+    width:58px;background:#FCFAF5;text-align:center;color:#8E939B;
+    font-size:11px;font-weight:600;border-right:1px solid var(--line-strong);
+  }
+  /* 内容格 */
+  td.cell{height:50px;background:var(--free);}
+  td.cell.today{background:var(--today-bg);}
+  .course{
+    display:flex;flex-direction:column;justify-content:center;
+    height:100%;margin:3px 5px;padding:6px 9px;
+    border-left:4px solid;border-radius:10px;
+  }
+  .course .n{font-size:12.5px;font-weight:700;color:#24282E;line-height:1.25;}
+  .course .t{font-size:10px;color:#5A6068;margin-top:2px;}
+  .course.yu{background:var(--yu-bg);border-color:var(--yu);}
+  .course.eng{background:var(--eng-bg);border-color:var(--eng);}
+  .course.tiao{background:var(--tiao-bg);border-color:var(--tiao);}
+  .course.bian{background:var(--bian-bg);border-color:var(--bian);}
+
+  /* ===== 底部补充 ===== */
+  .notes{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .notes .tag{
+    display:flex;align-items:center;gap:9px;background:var(--card);
+    border:1px solid var(--line);border-radius:13px;padding:11px 13px;font-size:12.5px;color:#5A5F66;
+  }
+  .notes .tag b{font-weight:700;color:var(--ink);}
+  .foot{margin-top:14px;font-size:11.5px;color:var(--faint);line-height:1.9;}
+  .foot span{display:block;}
+
+  @media (min-width:860px){
+    .app{max-width:900px;padding-top:32px;}
+    .title{font-size:26px;}
+    .day-tabs{display:none;}
+  }
+  @media print{
+    body{background:#fff;}
+    .app{max-width:none;padding:0;}
+    .scroll-wrap{border:none;box-shadow:none;overflow:visible;}
+    td.time, thead th.time-head{position:static;}
+    table{min-width:0;}
+    .day-tabs{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <h1 class="title">课外课表<span class="sub">二年级 · 新学期 · 四门课外班均为线上课</span></h1>
+    <div class="datechip">今天 <b id="today-label">--</b></div>
+  </div>
+
+  <!-- 今日卡 -->
+  <div class="today-card">
+    <div class="badge"><span class="w" id="today-w">周-</span><span class="d" id="today-d">--</span></div>
+    <div class="body">
+      <h2 id="today-h">今日安排</h2>
+      <p class="no-c" id="today-p" style="display:none;"></p>
+      <ul id="today-list"></ul>
+    </div>
+  </div>
+
+  <!-- 图例 -->
+  <div class="legend">
+    <span><span class="dot" style="background:#5277D8;"></span>语文</span>
+    <span><span class="dot" style="background:#7B6FDF;"></span>英语</span>
+    <span><span class="dot" style="background:#3E9A5F;"></span>跳绳</span>
+    <span><span class="dot" style="background:#2C97B2;"></span>编程</span>
+    <span><span class="dot" style="background:#DDD8CC;"></span>留白</span>
+  </div>
+
+  <!-- 星期导航 -->
+  <div class="day-tabs" id="day-tabs"></div>
+
+  <!-- 课表 -->
+  <div class="schedule-title">
+    <span>放学后 16:30 – 20:30</span>
+    <span class="pill">课外班时段</span>
+    <span class="hint">左右滑动</span>
+  </div>
+  <div class="scroll-wrap" id="scroll-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="time-head">时间</th>
+        <th data-day="1"><span class="w">周一</span></th>
+        <th data-day="2"><span class="w">周二</span></th>
+        <th data-day="3"><span class="w">周三</span></th>
+        <th data-day="4"><span class="w">周四</span></th>
+        <th data-day="5"><span class="w">周五</span></th>
+        <th data-day="6"><span class="w">周六</span></th>
+        <th data-day="0"><span class="w">周日</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 16:30 -->
+      <tr>
+        <td class="time">16:30</td>
+        <td class="cell" data-day="1" rowspan="8"></td>
+        <td class="cell" data-day="2" rowspan="5"></td>
+        <td class="cell" data-day="3" rowspan="8"></td>
+        <td class="cell" data-day="4"></td>
+        <td class="cell" data-day="5" rowspan="4"></td>
+        <td class="cell" data-day="6" rowspan="3"></td>
+        <td class="cell" data-day="0" rowspan="8"></td>
+      </tr>
+      <!-- 17:00 -->
+      <tr>
+        <td class="time">17:00</td>
+        <td class="cell" data-day="4" rowspan="2"><div class="course eng"><span class="n">英语</span><span class="t">17:00–18:00</span></div></td>
+      </tr>
+      <!-- 17:30 -->
+      <tr>
+        <td class="time">17:30</td>
+      </tr>
+      <!-- 18:00 -->
+      <tr>
+        <td class="time">18:00</td>
+        <td class="cell" data-day="4"></td>
+        <td class="cell" data-day="6" rowspan="3"><div class="course bian"><span class="n">编程</span><span class="t">18:00–19:30</span></div></td>
+      </tr>
+      <!-- 18:30 -->
+      <tr>
+        <td class="time">18:30</td>
+        <td class="cell" data-day="4" rowspan="3"><div class="course tiao"><span class="n">体能·跳绳</span><span class="t">18:50–20:00</span></div></td>
+        <td class="cell" data-day="5" rowspan="3"><div class="course yu"><span class="n">语文</span><span class="t">18:30–20:00</span></div></td>
+      </tr>
+      <!-- 19:00 -->
+      <tr>
+        <td class="time">19:00</td>
+        <td class="cell" data-day="2" rowspan="3"><div class="course yu"><span class="n">语文</span><span class="t">19:00–20:30</span></div></td>
+      </tr>
+      <!-- 19:30 -->
+      <tr>
+        <td class="time">19:30</td>
+        <td class="cell" data-day="6" rowspan="2"></td>
+      </tr>
+      <!-- 20:00 -->
+      <tr>
+        <td class="time">20:00</td>
+        <td class="cell" data-day="4"></td>
+        <td class="cell" data-day="5"></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- 补充说明 -->
+  <div class="notes">
+    <div class="tag"><span class="dot" style="background:#7B6FDF;"></span><span>周六上午 <b>08:00–09:00</b> 英语（线上）</span></div>
+    <div class="tag"><span class="dot" style="background:#DDD8CC;"></span><span>周日全天自由：兴趣 / 户外 / 家庭</span></div>
+  </div>
+
+  <div class="foot">
+    <span>空白格为留白时段，可自行补充新安排的课外班。</span>
+    <span>周四英语 17:00–18:00；四门课外班均为线上课。</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  try{
+    var DAYS = ["周日","周一","周二","周三","周四","周五","周六"];
+    var WEEK = {
+      1:[], 2:[{n:"语文",t:"19:00–20:30",c:"yu"}], 3:[],
+      4:[{n:"英语",t:"17:00–18:00",c:"eng"},{n:"体能·跳绳",t:"18:50–20:00",c:"tiao"}],
+      5:[{n:"语文",t:"18:30–20:00",c:"yu"}],
+      6:[{n:"编程",t:"18:00–19:30",c:"bian"}], 0:[]
+    };
+    var now = new Date();
+    var day = now.getDay();
+    var dd = ("0" + now.getDate()).slice(-2);
+    var mm = ("0" + (now.getMonth()+1)).slice(-2);
+
+    var label = document.getElementById("today-label");
+    if(label){ label.textContent = mm + "月" + dd + "日 · " + DAYS[day]; }
+    var badgeD = document.getElementById("today-d");
+    var badgeW = document.getElementById("today-w");
+    if(badgeD){ badgeD.textContent = dd; }
+    if(badgeW){ badgeW.textContent = DAYS[day]; }
+
+    // 高亮今日列
+    var heads = document.querySelectorAll("thead th[data-day]");
+    for(var i=0;i<heads.length;i++){
+      if(Number(heads[i].getAttribute("data-day")) === day){
+        heads[i].classList.add("today");
+        var mark = document.createElement("span");
+        mark.className = "mark";
+        mark.textContent = "今";
+        heads[i].appendChild(mark);
+      }
+    }
+    var cells = document.querySelectorAll("td.cell[data-day]");
+    for(var j=0;j<cells.length;j++){
+      if(Number(cells[j].getAttribute("data-day")) === day){
+        cells[j].classList.add("today");
+      }
+    }
+
+    // 星期导航 + 打开自动定位今日
+    var tabsWrap = document.getElementById("day-tabs");
+    var scrollWrap = document.getElementById("scroll-wrap");
+    var order = [1,2,3,4,5,6,0];
+    var btns = [];
+    var todayHead = null;
+    if(tabsWrap && scrollWrap){
+      for(var t=0;t<order.length;t++){
+        var d = order[t];
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = DAYS[d];
+        b.setAttribute("data-d", d);
+        if(d === day){ b.className = "on"; }
+        (function(dv, bv){
+          bv.addEventListener("click", function(){
+            gotoDay(dv);
+            for(var s=0;s<btns.length;s++){ btns[s].className = ""; }
+            bv.className = "on";
+          });
+        })(d, b);
+        btns.push(b);
+        tabsWrap.appendChild(b);
+      }
+    }
+    function gotoDay(d){
+      var target = document.querySelector('thead th[data-day="'+d+'"]');
+      if(target && scrollWrap){
+        scrollWrap.scrollLeft = target.offsetLeft - 40;
+      }
+    }
+    // 打开时定位到今天
+    var headToday = document.querySelector('thead th.today');
+    if(headToday && scrollWrap){
+      scrollWrap.scrollLeft = headToday.offsetLeft - 40;
+    }
+
+    // 今日摘要
+    var list = WEEK[day];
+    var h = document.getElementById("today-h");
+    var p = document.getElementById("today-p");
+    var ul = document.getElementById("today-list");
+    if(h){ h.textContent = DAYS[day] + " · 今日安排"; }
+    if(list.length === 0){
+      if(p){
+        p.style.display = "block";
+        p.textContent = "今天没有固定的课外班，可以好好做作业、运动和休息。";
+      }
+    } else {
+      for(var k=0;k<list.length;k++){
+        var li = document.createElement("li");
+        var bar = document.createElement("span");
+        var cls = list[k].c;
+        var color = cls==="yu"?"#5277D8":cls==="eng"?"#7B6FDF":cls==="tiao"?"#3E9A5F":"#2C97B2";
+        bar.className = "bar";
+        bar.style.background = color;
+        var name = document.createElement("span");
+        name.className = "cname";
+        name.textContent = list[k].n;
+        var t = document.createElement("span");
+        t.className = "ctime";
+        t.textContent = list[k].t;
+        li.appendChild(bar);
+        li.appendChild(name);
+        li.appendChild(t);
+        ul.appendChild(li);
+      }
+    }
+  }catch(e){ /* 保持页面可读 */ }
+})();
+</script>
+</body>
+</html>
