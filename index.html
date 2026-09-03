@@ -31,7 +31,7 @@
     -webkit-font-smoothing:antialiased;
     padding-bottom:env(safe-area-inset-bottom);
   }
-  .app{max-width:640px;margin:0 auto;padding:18px 14px 48px;}
+  .app{max-width:720px;margin:0 auto;padding:18px 14px 48px;}
 
   /* ===== 顶栏 ===== */
   .masthead{display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -77,103 +77,90 @@
   .legend span{display:inline-flex;align-items:center;gap:6px;}
   .dot{width:9px;height:9px;border-radius:3px;flex:none;}
 
-  /* ===== 星期导航 ===== */
+  /* ===== 区块标题 ===== */
+  .section{
+    margin-top:18px;background:var(--card);
+    border:1px solid var(--line);border-radius:20px;padding:15px 16px;
+    box-shadow:0 2px 10px rgba(60,50,30,.04);
+  }
+  .section-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .section-title .t{font-size:15px;font-weight:800;color:var(--ink);}
+  .section-title .pill{
+    font-size:11px;font-weight:500;color:var(--accent-deep);background:var(--accent-soft);
+    border-radius:999px;padding:3px 10px;
+  }
+  .section-title .hint{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:500;}
+
+  /* ===== 星期导航（周中） ===== */
   .day-tabs{
-    display:flex;margin:14px 0 10px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    padding-bottom:3px;
+    display:flex;margin:0 0 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;
   }
   .day-tabs button{
-    flex:none;min-width:44px;height:44px;border-radius:12px;border:1px solid var(--line-strong);
-    background:var(--card);color:#5A5F66;font-size:13px;font-weight:600;
+    flex:none;min-width:44px;height:42px;border-radius:11px;border:1px solid var(--line-strong);
+    background:#FBF9F4;color:#5A5F66;font-size:13px;font-weight:600;
     font-family:inherit;cursor:pointer;padding:0 14px;line-height:1;
   }
   .day-tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff;}
 
-  /* ===== 课表 ===== */
-  .schedule-title{
-    display:flex;align-items:center;gap:8px;margin:12px 2px 10px;
-    font-size:14px;font-weight:700;color:var(--ink);
-  }
-  .schedule-title .pill{
-    font-size:11px;font-weight:500;color:var(--accent-deep);background:var(--accent-soft);
-    border-radius:999px;padding:3px 10px;
-  }
-  .schedule-title .hint{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:500;}
-  .scroll-wrap{
-    overflow-x:auto;-webkit-overflow-scrolling:touch;
-    border:1px solid var(--line-strong);border-radius:18px;background:var(--card);
-    box-shadow:0 2px 10px rgba(60,50,30,.04);
-  }
-  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:660px;table-layout:fixed;}
+  /* ===== 表格通用 ===== */
+  .scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px;border:1px solid var(--line-strong);}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;table-layout:fixed;}
   th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   th:last-child,td:last-child{border-right:none;}
-  /* 表头 */
   thead th{
-    background:#FCFAF5;font-weight:700;padding:14px 4px;text-align:center;
+    background:#FCFAF5;font-weight:700;padding:13px 4px;text-align:center;
     color:#454A52;font-size:13px;position:relative;z-index:1;
   }
   thead th.today{background:var(--accent-soft);color:var(--accent-deep);}
   thead th .w{font-size:13px;}
-  thead th .dnum{display:block;font-size:10.5px;font-weight:500;color:var(--faint);margin-top:3px;}
+  thead th .dnum{display:block;font-size:10px;font-weight:500;color:var(--faint);margin-top:3px;}
   thead th.today .dnum{color:var(--accent-deep);opacity:.75;}
   thead th.today .mark{
-    position:absolute;top:7px;left:50%;transform:translateX(-50%);
+    position:absolute;top:6px;left:50%;transform:translateX(-50%);
     width:15px;height:15px;border-radius:50%;background:var(--accent);color:#fff;
     font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
   }
-  /* 时间列固定 */
   td.time, thead th.time-head{
     position:sticky;left:0;z-index:3;
-    width:58px;background:#FCFAF5;text-align:center;color:#8E939B;
-    font-size:11px;font-weight:600;border-right:1px solid var(--line-strong);
+    width:56px;background:#FCFAF5;text-align:center;color:#8E939B;
+    font-size:10.5px;font-weight:600;border-right:1px solid var(--line-strong);line-height:1.35;
   }
-  /* 内容格 */
-  td.cell{height:50px;background:var(--free);}
+  td.cell{height:48px;background:var(--free);}
   td.cell.today{background:var(--today-bg);}
   .course{
     display:flex;flex-direction:column;justify-content:center;
-    height:100%;margin:3px 5px;padding:6px 9px;
+    height:100%;margin:3px 5px;padding:5px 8px;
     border-left:4px solid;border-radius:10px;
   }
   .course .n{font-size:12.5px;font-weight:700;color:#24282E;line-height:1.25;}
-  .course .t{font-size:10px;color:#5A6068;margin-top:2px;}
+  .course .t{font-size:10px;color:#5A6068;margin-top:2px;line-height:1.3;}
   .course.yu{background:var(--yu-bg);border-color:var(--yu);}
   .course.eng{background:var(--eng-bg);border-color:var(--eng);}
   .course.tiao{background:var(--tiao-bg);border-color:var(--tiao);}
   .course.bian{background:var(--bian-bg);border-color:var(--bian);}
+  .course.free-note{background:#F2F0EA;border-color:#C9C4B6;}
+  .course.free-note .n{color:#8A877D;font-weight:600;}
 
-  /* ===== 周六上午线下课卡片 ===== */
-  .weekend-block{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;box-shadow:0 2px 10px rgba(60,50,30,.04);}
-  .wb-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:11px;}
-  .wb-item{display:flex;align-items:center;gap:12px;}
-  .wb-dot{width:10px;height:10px;border-radius:3px;flex:none;}
-  .wb-info{flex:1;min-width:0;}
-  .wb-name{font-size:14.5px;font-weight:700;color:var(--ink);}
-  .wb-time{font-size:12px;color:var(--muted);margin-top:3px;}
-  .wb-tag{flex:none;font-size:11.5px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);border-radius:999px;padding:6px 11px;}
+  /* 周中表 */
+  .tbl-weekday{min-width:520px;}
+  /* 周末表 */
+  .tbl-weekend td.cell{height:62px;}
+  .tbl-weekend td.time{font-size:11px;}
 
-  /* ===== 底部补充 ===== */
-  .notes{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
-  .notes .tag{
-    display:flex;align-items:center;gap:9px;background:var(--card);
-    border:1px solid var(--line);border-radius:13px;padding:11px 13px;font-size:12.5px;color:#5A5F66;
-  }
-  .notes .tag b{font-weight:700;color:var(--ink);}
-  .foot{margin-top:14px;font-size:11.5px;color:var(--faint);line-height:1.9;}
+  /* ===== 底部说明 ===== */
+  .foot{margin-top:16px;font-size:11.5px;color:var(--faint);line-height:1.9;}
   .foot span{display:block;}
 
   @media (min-width:860px){
-    .app{max-width:900px;padding-top:32px;}
+    .app{max-width:920px;padding-top:32px;}
     .title{font-size:26px;}
-    .day-tabs{display:none;}
   }
   @media print{
     body{background:#fff;}
     .app{max-width:none;padding:0;}
     .scroll-wrap{border:none;box-shadow:none;overflow:visible;}
     td.time, thead th.time-head{position:static;}
-    table{min-width:0;}
     .day-tabs{display:none;}
   }
 </style>
@@ -204,103 +191,113 @@
     <span><span class="dot" style="background:#DDD8CC;"></span>留白</span>
   </div>
 
-  <!-- 星期导航 -->
-  <div class="day-tabs" id="day-tabs"></div>
-
-  <!-- 课表 -->
-  <div class="schedule-title">
-    <span>放学后 16:30 – 20:30</span>
-    <span class="pill">课外班时段</span>
-    <span class="hint">左右滑动</span>
-  </div>
-  <div class="scroll-wrap" id="scroll-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th class="time-head">时间</th>
-        <th data-day="1"><span class="w">周一</span></th>
-        <th data-day="2"><span class="w">周二</span></th>
-        <th data-day="3"><span class="w">周三</span></th>
-        <th data-day="4"><span class="w">周四</span></th>
-        <th data-day="5"><span class="w">周五</span></th>
-        <th data-day="6"><span class="w">周六</span></th>
-        <th data-day="0"><span class="w">周日</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- 16:30 -->
-      <tr>
-        <td class="time">16:30</td>
-        <td class="cell" data-day="1" rowspan="8"></td>
-        <td class="cell" data-day="2" rowspan="5"></td>
-        <td class="cell" data-day="3" rowspan="8"></td>
-        <td class="cell" data-day="4"></td>
-        <td class="cell" data-day="5" rowspan="4"></td>
-        <td class="cell" data-day="6" rowspan="3"></td>
-        <td class="cell" data-day="0" rowspan="8"></td>
-      </tr>
-      <!-- 17:00 -->
-      <tr>
-        <td class="time">17:00</td>
-        <td class="cell" data-day="4" rowspan="2"><div class="course eng"><span class="n">英语</span><span class="t">17:00–18:00</span></div></td>
-      </tr>
-      <!-- 17:30 -->
-      <tr>
-        <td class="time">17:30</td>
-      </tr>
-      <!-- 18:00 -->
-      <tr>
-        <td class="time">18:00</td>
-        <td class="cell" data-day="4"></td>
-        <td class="cell" data-day="6" rowspan="3"><div class="course bian"><span class="n">核桃编程</span><span class="t">18:00–19:30 · 线上</span></div></td>
-      </tr>
-      <!-- 18:30 -->
-      <tr>
-        <td class="time">18:30</td>
-        <td class="cell" data-day="4" rowspan="3"><div class="course tiao"><span class="n">体能·跳绳</span><span class="t">18:50–20:00</span></div></td>
-        <td class="cell" data-day="5" rowspan="3"><div class="course yu"><span class="n">豆神语文</span><span class="t">18:30–20:00 · 线上直播</span></div></td>
-      </tr>
-      <!-- 19:00 -->
-      <tr>
-        <td class="time">19:00</td>
-        <td class="cell" data-day="2" rowspan="3"><div class="course yu"><span class="n">豆神语文</span><span class="t">19:00–20:30 · 线上直播</span></div></td>
-      </tr>
-      <!-- 19:30 -->
-      <tr>
-        <td class="time">19:30</td>
-        <td class="cell" data-day="6" rowspan="2"></td>
-      </tr>
-      <!-- 20:00 -->
-      <tr>
-        <td class="time">20:00</td>
-        <td class="cell" data-day="4"></td>
-        <td class="cell" data-day="5"></td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-
-  <!-- 周六上午线下课 -->
-  <div class="weekend-block">
-    <div class="wb-title">周六上午 · 线下课</div>
-    <div class="wb-item">
-      <span class="wb-dot" style="background:#7B6FDF;"></span>
-      <div class="wb-info">
-        <div class="wb-name">英语</div>
-        <div class="wb-time">08:00 – 09:00</div>
-      </div>
-      <span class="wb-tag">线下班</span>
+  <!-- ===== 周中区 ===== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="t">周中 · 周一至周五</span>
+      <span class="pill">放学后 16:30–20:30</span>
+      <span class="hint">左右滑动</span>
+    </div>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div class="scroll-wrap" id="scroll-weekday">
+      <table class="tbl-weekday">
+        <thead>
+          <tr>
+            <th class="time-head">时间</th>
+            <th data-day="1"><span class="w">周一</span></th>
+            <th data-day="2"><span class="w">周二</span></th>
+            <th data-day="3"><span class="w">周三</span></th>
+            <th data-day="4"><span class="w">周四</span></th>
+            <th data-day="5"><span class="w">周五</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 16:30 -->
+          <tr>
+            <td class="time">16:30</td>
+            <td class="cell" data-day="1" rowspan="8"></td>
+            <td class="cell" data-day="2" rowspan="5"></td>
+            <td class="cell" data-day="3" rowspan="8"></td>
+            <td class="cell" data-day="4"></td>
+            <td class="cell" data-day="5" rowspan="4"></td>
+          </tr>
+          <!-- 17:00 -->
+          <tr>
+            <td class="time">17:00</td>
+            <td class="cell" data-day="4" rowspan="2"><div class="course eng"><span class="n">英语</span><span class="t">17:00–18:00 · 线上</span></div></td>
+          </tr>
+          <!-- 17:30 -->
+          <tr>
+            <td class="time">17:30</td>
+          </tr>
+          <!-- 18:00 -->
+          <tr>
+            <td class="time">18:00</td>
+            <td class="cell" data-day="4"></td>
+          </tr>
+          <!-- 18:30 -->
+          <tr>
+            <td class="time">18:30</td>
+            <td class="cell" data-day="4" rowspan="3"><div class="course tiao"><span class="n">体能·跳绳</span><span class="t">18:50–20:00</span></div></td>
+            <td class="cell" data-day="5" rowspan="3"><div class="course yu"><span class="n">豆神语文</span><span class="t">18:30–20:00 · 线上直播</span></div></td>
+          </tr>
+          <!-- 19:00 -->
+          <tr>
+            <td class="time">19:00</td>
+            <td class="cell" data-day="2" rowspan="3"><div class="course yu"><span class="n">豆神语文</span><span class="t">19:00–20:30 · 线上直播</span></div></td>
+          </tr>
+          <!-- 19:30 -->
+          <tr>
+            <td class="time">19:30</td>
+          </tr>
+          <!-- 20:00 -->
+          <tr>
+            <td class="time">20:00</td>
+            <td class="cell" data-day="4"></td>
+            <td class="cell" data-day="5"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- 补充说明 -->
-  <div class="notes">
-    <div class="tag"><span class="dot" style="background:#DDD8CC;"></span><span>周日全天自由：兴趣 / 户外 / 家庭</span></div>
+  <!-- ===== 周末区 ===== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="t">周末 · 周六至周日</span>
+      <span class="pill">全天可安排</span>
+    </div>
+    <div class="scroll-wrap" id="scroll-weekend">
+      <table class="tbl-weekend">
+        <thead>
+          <tr>
+            <th class="time-head">时段</th>
+            <th data-day="6"><span class="w">周六</span></th>
+            <th data-day="0"><span class="w">周日</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="time">上午<br>08:00–12:00</td>
+            <td class="cell" data-day="6"><div class="course eng"><span class="n">英语</span><span class="t">08:00–09:00 · 线下班</span></div></td>
+            <td class="cell" data-day="0" rowspan="3"><div class="course free-note"><span class="n">全天自由</span><span class="t">兴趣 · 户外 · 家庭</span></div></td>
+          </tr>
+          <tr>
+            <td class="time">下午<br>12:00–18:00</td>
+            <td class="cell" data-day="6"></td>
+          </tr>
+          <tr>
+            <td class="time">晚上<br>18:00–20:30</td>
+            <td class="cell" data-day="6"><div class="course bian"><span class="n">核桃编程</span><span class="t">18:00–19:30 · 线上</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="foot">
     <span>空白格为留白时段，可自行补充新安排的课外班。</span>
-    <span>周四英语 17:00–18:00（线上）；周六英语 08:00–09:00（线下班）；其余为线上课。</span>
+    <span>周四英语 17:00–18:00（线上）；周六英语 08:00–09:00（线下班）；豆神语文、核桃编程为线上直播课。</span>
   </div>
 </div>
 
@@ -310,9 +307,10 @@
     var DAYS = ["周日","周一","周二","周三","周四","周五","周六"];
     var WEEK = {
       1:[], 2:[{n:"豆神语文",t:"19:00–20:30 · 线上直播",c:"yu"}], 3:[],
-      4:[{n:"英语",t:"17:00–18:00",c:"eng"},{n:"体能·跳绳",t:"18:50–20:00",c:"tiao"}],
+      4:[{n:"英语",t:"17:00–18:00 · 线上",c:"eng"},{n:"体能·跳绳",t:"18:50–20:00",c:"tiao"}],
       5:[{n:"豆神语文",t:"18:30–20:00 · 线上直播",c:"yu"}],
-      6:[{n:"核桃编程",t:"18:00–19:30 · 线上",c:"bian"}], 0:[]
+      6:[{n:"英语",t:"08:00–09:00 · 线下班",c:"eng"},{n:"核桃编程",t:"18:00–19:30 · 线上",c:"bian"}],
+      0:[]
     };
     var now = new Date();
     var day = now.getDay();
@@ -326,7 +324,7 @@
     if(badgeD){ badgeD.textContent = dd; }
     if(badgeW){ badgeW.textContent = DAYS[day]; }
 
-    // 高亮今日列
+    // 高亮今日列（周中表 + 周末表）
     var heads = document.querySelectorAll("thead th[data-day]");
     for(var i=0;i<heads.length;i++){
       if(Number(heads[i].getAttribute("data-day")) === day){
@@ -344,13 +342,16 @@
       }
     }
 
-    // 星期导航 + 打开自动定位今日
+    // 周中星期导航（周一~周五）
     var tabsWrap = document.getElementById("day-tabs");
-    var scrollWrap = document.getElementById("scroll-wrap");
-    var order = [1,2,3,4,5,6,0];
+    var scrollWeekday = document.getElementById("scroll-weekday");
+    var order = [1,2,3,4,5];
     var btns = [];
-    var todayHead = null;
-    if(tabsWrap && scrollWrap){
+    function gotoDay(d){
+      var target = document.querySelector('thead th[data-day="'+d+'"]');
+      if(target && scrollWeekday){ scrollWeekday.scrollLeft = target.offsetLeft - 40; }
+    }
+    if(tabsWrap && scrollWeekday){
       for(var t=0;t<order.length;t++){
         var d = order[t];
         var b = document.createElement("button");
@@ -369,16 +370,10 @@
         tabsWrap.appendChild(b);
       }
     }
-    function gotoDay(d){
-      var target = document.querySelector('thead th[data-day="'+d+'"]');
-      if(target && scrollWrap){
-        scrollWrap.scrollLeft = target.offsetLeft - 40;
-      }
-    }
-    // 打开时定位到今天
-    var headToday = document.querySelector('thead th.today');
-    if(headToday && scrollWrap){
-      scrollWrap.scrollLeft = headToday.offsetLeft - 40;
+    // 今天在周中则自动定位到今日列
+    if(day >= 1 && day <= 5){
+      var headToday = document.querySelector('thead th[data-day="'+day+'"]');
+      if(headToday && scrollWeekday){ scrollWeekday.scrollLeft = headToday.offsetLeft - 40; }
     }
 
     // 今日摘要
@@ -390,7 +385,11 @@
     if(list.length === 0){
       if(p){
         p.style.display = "block";
-        p.textContent = "今天没有固定的课外班，可以好好做作业、运动和休息。";
+        if(day === 0){
+          p.textContent = "周日全天自由，可以安排兴趣、户外运动和家庭时间。";
+        } else {
+          p.textContent = "今天没有固定的课外班，可以好好做作业、运动和休息。";
+        }
       }
     } else {
       for(var k=0;k<list.length;k++){
