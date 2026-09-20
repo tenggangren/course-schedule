@@ -42,9 +42,15 @@
   .masthead{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .title{font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--ink);}
   .title .sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:4px;letter-spacing:0;}
-  .datechip{cursor:pointer;user-select:none;}
-  .datechip .cal-ic{margin-left:6px;font-size:13px;opacity:.6;}
-  .cal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none;align-items:center;justify-content:center;padding:20px;}
+  .datechip{
+    cursor:pointer;user-select:none;font-family:inherit;appearance:none;
+    flex:none;display:inline-flex;align-items:center;gap:6px;
+    background:var(--card);border:1px solid var(--line-strong);border-radius:999px;
+    padding:8px 13px;font-size:12.5px;color:var(--muted);
+  }
+  .datechip .cal-ic{margin-left:2px;font-size:13px;opacity:.6;}
+  .datechip b{font-weight:700;color:var(--ink);}
+  .cal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
   .cal-overlay.open{display:flex;}
   .cal-panel{background:#fff;border-radius:16px;width:100%;max-width:340px;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.15);}
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -61,11 +67,6 @@
   .cal-foot button{flex:1;padding:9px 0;border:none;border-radius:10px;font-size:13px;cursor:pointer;}
   .cal-foot .btn-today{background:#F4F3EE;color:#24282E;}
   .cal-foot .btn-close{background:#E8743B;color:#fff;font-weight:600;}
-    flex:none;display:inline-flex;align-items:center;gap:6px;
-    background:var(--card);border:1px solid var(--line-strong);border-radius:999px;
-    padding:8px 13px;font-size:12.5px;color:var(--muted);
-  }
-  .datechip b{font-weight:700;color:var(--ink);}
 
   /* ===== 今日卡 ===== */
   .today-card{
@@ -201,7 +202,7 @@
 <div class="app">
   <div class="masthead">
     <h1 class="title">课外课表<span class="sub">二年级 · 新学期</span></h1>
-    <div class="datechip" id="datechip" title="点击选择日期预览">今天 <b id="today-label">--</b><span class="cal-ic">▦</span></div>
+    <button type="button" class="datechip" id="datechip" title="点击选择日期预览">今天 <b id="today-label">--</b><span class="cal-ic">▦</span></button>
   </div>
 
   <!-- 今日卡 -->
@@ -235,8 +236,6 @@
       <span class="hint">左右滑动</span>
     </div>
     <div class="after-school">校内延时课：<b>周一 / 周五 16:00–17:00 趣味英语</b>（郝韵老师），这两天接娃时间为 17:00</div>
-    <div class="day-tabs"
-    </div>
     <div class="day-tabs" id="day-tabs"></div>
     <div class="scroll-wrap" id="scroll-weekday">
       <table class="tbl-weekday">
@@ -343,6 +342,22 @@
   </div>
 </div>
 
+  <div class="cal-overlay" id="cal-overlay">
+    <div class="cal-panel">
+      <div class="cal-head">
+        <button type="button" id="cal-prev">‹</button>
+        <span class="cal-title" id="cal-title">2026年9月</span>
+        <button type="button" id="cal-next">›</button>
+      </div>
+      <div class="cal-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="cal-days" id="cal-days"></div>
+      <div class="cal-foot">
+        <button type="button" class="btn-today" id="cal-today">回到今天</button>
+        <button type="button" class="btn-close" id="cal-close">完成</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
   try{
@@ -413,6 +428,7 @@
         if(target && scrollWeekday){ scrollWeekday.scrollLeft = target.offsetLeft - 40; }
       }
       if(tabsWrap && scrollWeekday){
+        tabsWrap.innerHTML = "";
         for(var t=0;t<order.length;t++){
           var d2 = order[t];
           var b = document.createElement("button");
@@ -460,6 +476,7 @@
           }
         }
       } else {
+        if(p){ p.style.display = "none"; p.textContent = ""; }
         for(var k=0;k<list.length;k++){
           var li = document.createElement("li");
           var bar = document.createElement("span");
@@ -520,46 +537,36 @@
         cell.textContent = dayNum;
         (function(yy,mm,dd){
           cell.addEventListener("click", function(){
-            selDate = new Date(yy, mm, dd);
-            renderDay(selDate);
-            renderCal();
+            pickDate(new Date(yy, mm, dd));
           });
         })(rY, rM, rD);
         wrap.appendChild(cell);
       }
     }
 
+    function pickDate(d){
+      selDate = new Date(d);
+      selDate.setHours(0,0,0,0);
+      renderDay(selDate);
+      closeCal();
+    }
     function openCal(){
+      if(!overlay){ return; }
       viewY = selDate.getFullYear();
       viewM = selDate.getMonth();
       renderCal();
       overlay.classList.add("open");
     }
-    function closeCal(){ overlay.classList.remove("open"); }
+    function closeCal(){ if(overlay){ overlay.classList.remove("open"); } }
 
     document.getElementById("datechip").addEventListener("click", openCal);
     document.getElementById("cal-prev").addEventListener("click", function(){ viewM--; if(viewM<0){viewM=11;viewY--;} renderCal(); });
     document.getElementById("cal-next").addEventListener("click", function(){ viewM++; if(viewM>11){viewM=0;viewY++;} renderCal(); });
-    document.getElementById("cal-today").addEventListener("click", function(){ selDate = new Date(today0); renderDay(new Date()); viewY=today0.getFullYear(); viewM=today0.getMonth(); renderCal(); });
+    document.getElementById("cal-today").addEventListener("click", function(){ pickDate(today0); });
     document.getElementById("cal-close").addEventListener("click", closeCal);
     overlay.addEventListener("click", function(e){ if(e.target === overlay){ closeCal(); } });
-  }catch(e){ /* 保持页面可读 */ }
+  }catch(e){ console.error(e); }
 })();
 </script>
-  <div class="cal-overlay" id="cal-overlay">
-    <div class="cal-panel">
-      <div class="cal-head">
-        <button type="button" id="cal-prev">‹</button>
-        <span class="cal-title" id="cal-title">2026年9月</span>
-        <button type="button" id="cal-next">›</button>
-      </div>
-      <div class="cal-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-      <div class="cal-days" id="cal-days"></div>
-      <div class="cal-foot">
-        <button type="button" class="btn-today" id="cal-today">回到今天</button>
-        <button type="button" class="btn-close" id="cal-close">完成</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
