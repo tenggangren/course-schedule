@@ -41,6 +41,23 @@
   .title .sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:4px;letter-spacing:0;}
   .datechip{cursor:pointer;user-select:none;}
   .datechip .cal-ic{margin-left:6px;font-size:13px;opacity:.6;}
+  .cal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none;align-items:center;justify-content:center;padding:20px;}
+  .cal-overlay.open{display:flex;}
+  .cal-panel{background:#fff;border-radius:16px;width:100%;max-width:340px;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.15);}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-head button{width:32px;height:32px;border:none;background:#F4F3EE;border-radius:8px;font-size:18px;cursor:pointer;color:#24282E;}
+  .cal-title{font-size:15px;font-weight:700;color:#1A1B1C;}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:#8A877D;margin-bottom:6px;}
+  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .cal-days .cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;border-radius:8px;cursor:pointer;color:#24282E;border:none;background:transparent;}
+  .cal-days .cd:hover{background:#F4F3EE;}
+  .cal-days .cd.other{color:#C9C4B6;}
+  .cal-days .cd.today{background:#F4E3D0;font-weight:700;}
+  .cal-days .cd.sel{background:#E8743B;color:#fff;font-weight:700;}
+  .cal-foot{display:flex;gap:8px;margin-top:12px;}
+  .cal-foot button{flex:1;padding:9px 0;border:none;border-radius:10px;font-size:13px;cursor:pointer;}
+  .cal-foot .btn-today{background:#F4F3EE;color:#24282E;}
+  .cal-foot .btn-close{background:#E8743B;color:#fff;font-weight:600;}
     flex:none;display:inline-flex;align-items:center;gap:6px;
     background:var(--card);border:1px solid var(--line-strong);border-radius:999px;
     padding:8px 13px;font-size:12.5px;color:var(--muted);
@@ -182,7 +199,6 @@
   <div class="masthead">
     <h1 class="title">课外课表<span class="sub">二年级 · 新学期</span></h1>
     <div class="datechip" id="datechip" title="点击选择日期预览">今天 <b id="today-label">--</b><span class="cal-ic">▦</span></div>
-    <input type="date" id="date-picker" style="position:absolute;left:-9999px;top:0;opacity:0;">
   </div>
 
   <!-- 今日卡 -->
@@ -464,20 +480,83 @@
 
     renderDay(new Date());
 
-    var chip = document.getElementById("datechip");
-    var picker = document.getElementById("date-picker");
-    if(chip && picker){
-      chip.addEventListener("click", function(){ picker.showPicker ? picker.showPicker() : picker.click(); });
-      picker.addEventListener("change", function(){
-        if(picker.value){
-          var parts = picker.value.split("-");
-          var nd = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
-          renderDay(nd);
+    var overlay = document.getElementById("cal-overlay");
+    var viewY = today0.getFullYear();
+    var viewM = today0.getMonth();
+    var selDate = new Date(today0);
+
+    function sameDay(a, b){ var x=new Date(a); x.setHours(0,0,0,0); var y=new Date(b); y.setHours(0,0,0,0); return x.getTime()===y.getTime(); }
+
+    function renderCal(){
+      document.getElementById("cal-title").textContent = viewY + "年" + (viewM+1) + "月";
+      var wrap = document.getElementById("cal-days");
+      wrap.innerHTML = "";
+      var startDay = new Date(viewY, viewM, 1).getDay();
+      var dim = new Date(viewY, viewM+1, 0).getDate();
+      var pdim = new Date(viewY, viewM, 0).getDate();
+      for(var i=0;i<42;i++){
+        var cell = document.createElement("button");
+        cell.type = "button";
+        var dayNum, rY, rM, rD, cls="cd";
+        if(i < startDay){
+          dayNum = pdim - startDay + 1 + i; cls += " other";
+          var pd = new Date(viewY, viewM-1, dayNum);
+          rY=pd.getFullYear(); rM=pd.getMonth(); rD=pd.getDate();
+        } else if(i >= startDay + dim){
+          dayNum = i - startDay - dim + 1; cls += " other";
+          var nd = new Date(viewY, viewM+1, dayNum);
+          rY=nd.getFullYear(); rM=nd.getMonth(); rD=nd.getDate();
+        } else {
+          dayNum = i - startDay + 1;
+          rY=viewY; rM=viewM; rD=dayNum;
+          var cd = new Date(rY, rM, rD);
+          if(sameDay(cd, today0)){ cls += " today"; }
+          if(sameDay(cd, selDate)){ cls += " sel"; }
         }
-      });
+        cell.className = cls;
+        cell.textContent = dayNum;
+        (function(yy,mm,dd){
+          cell.addEventListener("click", function(){
+            selDate = new Date(yy, mm, dd);
+            renderDay(selDate);
+            renderCal();
+          });
+        })(rY, rM, rD);
+        wrap.appendChild(cell);
+      }
     }
+
+    function openCal(){
+      viewY = selDate.getFullYear();
+      viewM = selDate.getMonth();
+      renderCal();
+      overlay.classList.add("open");
+    }
+    function closeCal(){ overlay.classList.remove("open"); }
+
+    document.getElementById("datechip").addEventListener("click", openCal);
+    document.getElementById("cal-prev").addEventListener("click", function(){ viewM--; if(viewM<0){viewM=11;viewY--;} renderCal(); });
+    document.getElementById("cal-next").addEventListener("click", function(){ viewM++; if(viewM>11){viewM=0;viewY++;} renderCal(); });
+    document.getElementById("cal-today").addEventListener("click", function(){ selDate = new Date(today0); renderDay(new Date()); viewY=today0.getFullYear(); viewM=today0.getMonth(); renderCal(); });
+    document.getElementById("cal-close").addEventListener("click", closeCal);
+    overlay.addEventListener("click", function(e){ if(e.target === overlay){ closeCal(); } });
   }catch(e){ /* 保持页面可读 */ }
 })();
 </script>
+  <div class="cal-overlay" id="cal-overlay">
+    <div class="cal-panel">
+      <div class="cal-head">
+        <button type="button" id="cal-prev">‹</button>
+        <span class="cal-title" id="cal-title">2026年9月</span>
+        <button type="button" id="cal-next">›</button>
+      </div>
+      <div class="cal-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="cal-days" id="cal-days"></div>
+      <div class="cal-foot">
+        <button type="button" class="btn-today" id="cal-today">回到今天</button>
+        <button type="button" class="btn-close" id="cal-close">完成</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
