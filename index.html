@@ -77,6 +77,8 @@
   .bar{width:4px;border-radius:2px;align-self:stretch;flex:none;}
 
   /* ===== 图例 ===== */
+  .after-school{font-size:12px;color:var(--muted);background:#FDE8DA;border:1px solid #F5C9AE;border-radius:10px;padding:8px 12px;margin:10px 0 0;}
+  .after-school b{color:#C45A2A;font-weight:700;}
   .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:16px 2px 2px;font-size:12px;color:#5A5F66;}
   .legend span{display:inline-flex;align-items:center;gap:6px;}
   .dot{width:9px;height:9px;border-radius:3px;flex:none;}
@@ -145,6 +147,7 @@
   .course.bian{background:var(--bian-bg);border-color:var(--bian);}
   .course.qi{background:var(--qi-bg);border-color:var(--qi);}
   .course.lian{background:var(--lian-bg);border-color:var(--lian);}
+  .course.fun{background:#FDE8DA;border-color:#E8743B;}
   .course.free-note{background:#F2F0EA;border-color:#C9C4B6;}
   .course.free-note .n{color:#8A877D;font-weight:600;}
 
@@ -199,6 +202,7 @@
     <span><span class="dot" style="background:#2C97B2;"></span>核桃编程</span>
     <span><span class="dot" style="background:#A9704A;"></span>围棋</span>
     <span><span class="dot" style="background:#D99A3D;"></span>练字</span>
+    <span><span class="dot" style="background:#E8743B;"></span>趣味英语</span>
     <span><span class="dot" style="background:#DDD8CC;"></span>留白</span>
   </div>
 
@@ -208,6 +212,9 @@
       <span class="t">周中 · 周一至周五</span>
       <span class="pill">放学后 16:30–20:30</span>
       <span class="hint">左右滑动</span>
+    </div>
+    <div class="after-school">校内延时课：<b>周一 / 周五 16:00–17:00 趣味英语</b>（郝韵老师），这两天接娃时间为 17:00</div>
+    <div class="day-tabs"
     </div>
     <div class="day-tabs" id="day-tabs"></div>
     <div class="scroll-wrap" id="scroll-weekday">
@@ -311,7 +318,7 @@
 
   <div class="foot">
     <span>空白格为留白时段，可自行补充新安排的课外班。</span>
-    <span>周一 18:00–20:15、周三 17:30–19:45 围棋；周四英语 17:00–18:00（线下班）；周六英语 08:00–09:00、练字 09:00–11:00（均线下班）；豆神语文、核桃编程为线上直播课。</span>
+    <span>周一、周五 16:00–17:00 趣味英语（校内延时课）；周一 18:00–20:15、周三 17:30–19:45 围棋；周四英语 17:00–18:00（线下班）；周六英语 08:00–09:00、练字 09:00–11:00（均线下班）；豆神语文、核桃编程为线上直播课。</span>
   </div>
 </div>
 
@@ -320,9 +327,9 @@
   try{
     var DAYS = ["周日","周一","周二","周三","周四","周五","周六"];
     var WEEK = {
-      1:[{n:"围棋",t:"18:00–20:15",c:"qi"}], 2:[{n:"豆神语文",t:"19:00–20:30 · 线上直播",c:"yu"}], 3:[{n:"围棋",t:"17:30–19:45",c:"qi"}],
+      1:[{n:"趣味英语",t:"16:00–17:00 · 校内延时",c:"fun"},{n:"围棋",t:"18:00–20:15",c:"qi"}], 2:[{n:"豆神语文",t:"19:00–20:30 · 线上直播",c:"yu"}], 3:[{n:"围棋",t:"17:30–19:45",c:"qi"}],
       4:[{n:"英语",t:"17:00–18:00 · 线下班",c:"eng"},{n:"体能·跳绳",t:"18:50–20:00",c:"tiao"}],
-      5:[{n:"豆神语文",t:"18:30–20:00 · 线上直播",c:"yu"}],
+      5:[{n:"趣味英语",t:"16:00–17:00 · 校内延时",c:"fun"},{n:"豆神语文",t:"18:30–20:00 · 线上直播",c:"yu"}],
       6:[{n:"英语",t:"08:00–09:00 · 线下班",c:"eng"},{n:"练字",t:"09:00–11:00 · 线下班",c:"lian"},{n:"核桃编程",t:"18:00–19:30 · 线上",c:"bian"}],
       0:[]
     };
@@ -397,7 +404,7 @@
     var ul = document.getElementById("today-list");
     if(h){ h.textContent = DAYS[day] + " · 今日安排"; }
     var schoolEl = document.getElementById("school-time");
-    var schoolTimes = {1:"16:00",2:"16:00",3:"17:00",4:"16:00",5:"16:00"};
+    var schoolTimes = {1:"17:00",2:"16:00",3:"17:00",4:"16:00",5:"17:00"};
     if(schoolEl){
       if(schoolTimes[day]){
         schoolEl.innerHTML = "今日放学 " + schoolTimes[day];
@@ -420,7 +427,7 @@
         var li = document.createElement("li");
         var bar = document.createElement("span");
         var cls = list[k].c;
-        var color = cls==="yu"?"#5277D8":cls==="eng"?"#7B6FDF":cls==="tiao"?"#3E9A5F":cls==="qi"?"#A9704A":"#2C97B2";
+        var color = cls==="yu"?"#5277D8":cls==="eng"?"#7B6FDF":cls==="tiao"?"#3E9A5F":cls==="qi"?"#A9704A":cls==="lian"?"#D99A3D":cls==="fun"?"#E8743B":"#2C97B2";
         bar.className = "bar";
         bar.style.background = color;
         var name = document.createElement("span");
