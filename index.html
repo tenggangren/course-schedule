@@ -39,7 +39,8 @@
   .masthead{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .title{font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--ink);}
   .title .sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:4px;letter-spacing:0;}
-  .datechip{
+  .datechip{cursor:pointer;user-select:none;}
+  .datechip .cal-ic{margin-left:6px;font-size:13px;opacity:.6;}
     flex:none;display:inline-flex;align-items:center;gap:6px;
     background:var(--card);border:1px solid var(--line-strong);border-radius:999px;
     padding:8px 13px;font-size:12.5px;color:var(--muted);
@@ -180,7 +181,8 @@
 <div class="app">
   <div class="masthead">
     <h1 class="title">课外课表<span class="sub">二年级 · 新学期</span></h1>
-    <div class="datechip">今天 <b id="today-label">--</b></div>
+    <div class="datechip" id="datechip" title="点击选择日期预览">今天 <b id="today-label">--</b><span class="cal-ic">▦</span></div>
+    <input type="date" id="date-picker" style="position:absolute;left:-9999px;top:0;opacity:0;">
   </div>
 
   <!-- 今日卡 -->
@@ -333,114 +335,146 @@
       6:[{n:"英语",t:"08:00–09:00 · 线下班",c:"eng"},{n:"练字",t:"09:00–11:00 · 线下班",c:"lian"},{n:"核桃编程",t:"18:00–19:30 · 线上",c:"bian"}],
       0:[]
     };
-    var now = new Date();
-    var day = now.getDay();
-    var dd = ("0" + now.getDate()).slice(-2);
-    var mm = ("0" + (now.getMonth()+1)).slice(-2);
-
-    var label = document.getElementById("today-label");
-    if(label){ label.textContent = mm + "月" + dd + "日 · " + DAYS[day]; }
-    var badgeD = document.getElementById("today-d");
-    var badgeW = document.getElementById("today-w");
-    if(badgeD){ badgeD.textContent = dd; }
-    if(badgeW){ badgeW.textContent = DAYS[day]; }
-
-    // 高亮今日列（周中表 + 周末表）
-    var heads = document.querySelectorAll("thead th[data-day]");
-    for(var i=0;i<heads.length;i++){
-      if(Number(heads[i].getAttribute("data-day")) === day){
-        heads[i].classList.add("today");
-        var mark = document.createElement("span");
-        mark.className = "mark";
-        mark.textContent = "今";
-        heads[i].appendChild(mark);
-      }
-    }
-    var cells = document.querySelectorAll("td.cell[data-day]");
-    for(var j=0;j<cells.length;j++){
-      if(Number(cells[j].getAttribute("data-day")) === day){
-        cells[j].classList.add("today");
-      }
-    }
-
-    // 周中星期导航（周一~周五）
-    var tabsWrap = document.getElementById("day-tabs");
-    var scrollWeekday = document.getElementById("scroll-weekday");
-    var order = [1,2,3,4,5];
-    var btns = [];
-    function gotoDay(d){
-      var target = document.querySelector('thead th[data-day="'+d+'"]');
-      if(target && scrollWeekday){ scrollWeekday.scrollLeft = target.offsetLeft - 40; }
-    }
-    if(tabsWrap && scrollWeekday){
-      for(var t=0;t<order.length;t++){
-        var d = order[t];
-        var b = document.createElement("button");
-        b.type = "button";
-        b.textContent = DAYS[d];
-        b.setAttribute("data-d", d);
-        if(d === day){ b.className = "on"; }
-        (function(dv, bv){
-          bv.addEventListener("click", function(){
-            gotoDay(dv);
-            for(var s=0;s<btns.length;s++){ btns[s].className = ""; }
-            bv.className = "on";
-          });
-        })(d, b);
-        btns.push(b);
-        tabsWrap.appendChild(b);
-      }
-    }
-    // 今天在周中则自动定位到今日列
-    if(day >= 1 && day <= 5){
-      var headToday = document.querySelector('thead th[data-day="'+day+'"]');
-      if(headToday && scrollWeekday){ scrollWeekday.scrollLeft = headToday.offsetLeft - 40; }
-    }
-
-    // 今日摘要
-    var list = WEEK[day];
-    var h = document.getElementById("today-h");
-    var p = document.getElementById("today-p");
-    var ul = document.getElementById("today-list");
-    if(h){ h.textContent = DAYS[day] + " · 今日安排"; }
-    var schoolEl = document.getElementById("school-time");
     var schoolTimes = {1:"17:00",2:"16:00",3:"17:00",4:"16:00",5:"17:00"};
-    if(schoolEl){
-      if(schoolTimes[day]){
-        schoolEl.innerHTML = "今日放学 " + schoolTimes[day];
-        schoolEl.style.display = "block";
-      } else {
-        schoolEl.style.display = "none";
-      }
+    var today0 = new Date();
+    today0.setHours(0,0,0,0);
+
+    function clearHighlights(){
+      var olds = document.querySelectorAll("thead th.today, td.cell.today");
+      for(var i=0;i<olds.length;i++){ olds[i].classList.remove("today"); }
+      var marks = document.querySelectorAll("thead th .mark");
+      for(var m=0;m<marks.length;m++){ marks[m].parentNode.removeChild(marks[m]); }
+      var tabs = document.querySelectorAll("#day-tabs button");
+      for(var t=0;t<tabs.length;t++){ tabs[t].className = ""; }
+      var ul = document.getElementById("today-list");
+      if(ul){ ul.innerHTML = ""; }
     }
-    if(list.length === 0){
-      if(p){
-        p.style.display = "block";
-        if(day === 0){
-          p.textContent = "周日全天自由，可以安排兴趣、户外运动和家庭时间。";
-        } else {
-          p.textContent = "今天没有固定的课外班，可以好好做作业、运动和休息。";
+
+    function renderDay(d){
+      clearHighlights();
+      var day = d.getDay();
+      var d0 = new Date(d); d0.setHours(0,0,0,0);
+      var isToday = (d0.getTime() === today0.getTime());
+      var dd = ("0" + d.getDate()).slice(-2);
+      var mm = ("0" + (d.getMonth()+1)).slice(-2);
+
+      var label = document.getElementById("today-label");
+      var chip = document.getElementById("datechip");
+      if(label){ label.textContent = mm + "月" + dd + "日 · " + DAYS[day]; }
+      if(chip){ chip.firstChild.textContent = isToday ? "今天 " : "预览 "; }
+
+      var badgeD = document.getElementById("today-d");
+      var badgeW = document.getElementById("today-w");
+      if(badgeD){ badgeD.textContent = dd; }
+      if(badgeW){ badgeW.textContent = DAYS[day]; }
+
+      var heads = document.querySelectorAll("thead th[data-day]");
+      for(var i=0;i<heads.length;i++){
+        if(Number(heads[i].getAttribute("data-day")) === day){
+          heads[i].classList.add("today");
+          var mark = document.createElement("span");
+          mark.className = "mark";
+          mark.textContent = isToday ? "今" : "选";
+          heads[i].appendChild(mark);
         }
       }
-    } else {
-      for(var k=0;k<list.length;k++){
-        var li = document.createElement("li");
-        var bar = document.createElement("span");
-        var cls = list[k].c;
-        var color = cls==="yu"?"#5277D8":cls==="eng"?"#7B6FDF":cls==="tiao"?"#3E9A5F":cls==="qi"?"#A9704A":cls==="lian"?"#D99A3D":cls==="fun"?"#E8743B":"#2C97B2";
-        bar.className = "bar";
-        bar.style.background = color;
-        var name = document.createElement("span");
-        name.className = "cname";
-        name.textContent = list[k].n;
-        var t = document.createElement("span");
-        t.className = "ctime";
-        t.textContent = list[k].t;
-        li.appendChild(bar);
-        li.appendChild(name);
-        li.appendChild(t);
-        ul.appendChild(li);
+      var cells = document.querySelectorAll("td.cell[data-day]");
+      for(var j=0;j<cells.length;j++){
+        if(Number(cells[j].getAttribute("data-day")) === day){
+          cells[j].classList.add("today");
+        }
       }
+
+      var tabsWrap = document.getElementById("day-tabs");
+      var scrollWeekday = document.getElementById("scroll-weekday");
+      var order = [1,2,3,4,5];
+      var btns = [];
+      function gotoDay(dd2){
+        var target = document.querySelector('thead th[data-day="'+dd2+'"]');
+        if(target && scrollWeekday){ scrollWeekday.scrollLeft = target.offsetLeft - 40; }
+      }
+      if(tabsWrap && scrollWeekday){
+        for(var t=0;t<order.length;t++){
+          var d2 = order[t];
+          var b = document.createElement("button");
+          b.type = "button";
+          b.textContent = DAYS[d2];
+          b.setAttribute("data-d", d2);
+          if(d2 === day){ b.className = "on"; }
+          (function(dv, bv){
+            bv.addEventListener("click", function(){
+              gotoDay(dv);
+              for(var s=0;s<btns.length;s++){ btns[s].className = ""; }
+              bv.className = "on";
+            });
+          })(d2, b);
+          btns.push(b);
+          tabsWrap.appendChild(b);
+        }
+      }
+      if(day >= 1 && day <= 5){
+        var headToday = document.querySelector('thead th[data-day="'+day+'"]');
+        if(headToday && scrollWeekday){ scrollWeekday.scrollLeft = headToday.offsetLeft - 40; }
+      }
+
+      var list = WEEK[day];
+      var h = document.getElementById("today-h");
+      var p = document.getElementById("today-p");
+      var ul = document.getElementById("today-list");
+      if(h){ h.textContent = DAYS[day] + (isToday ? " · 今日安排" : " · 预览"); }
+      var schoolEl = document.getElementById("school-time");
+      if(schoolEl){
+        if(schoolTimes[day]){
+          schoolEl.innerHTML = (isToday ? "今日放学 " : "当天放学 ") + schoolTimes[day];
+          schoolEl.style.display = "block";
+        } else {
+          schoolEl.style.display = "none";
+        }
+      }
+      if(list.length === 0){
+        if(p){
+          p.style.display = "block";
+          if(day === 0){
+            p.textContent = "周日全天自由，可以安排兴趣、户外运动和家庭时间。";
+          } else {
+            p.textContent = "当天没有固定的课外班，可以好好做作业、运动和休息。";
+          }
+        }
+      } else {
+        for(var k=0;k<list.length;k++){
+          var li = document.createElement("li");
+          var bar = document.createElement("span");
+          var cls = list[k].c;
+          var color = cls==="yu"?"#5277D8":cls==="eng"?"#7B6FDF":cls==="tiao"?"#3E9A5F":cls==="qi"?"#A9704A":cls==="lian"?"#D99A3D":cls==="fun"?"#E8743B":"#2C97B2";
+          bar.className = "bar";
+          bar.style.background = color;
+          var name = document.createElement("span");
+          name.className = "cname";
+          name.textContent = list[k].n;
+          var t = document.createElement("span");
+          t.className = "ctime";
+          t.textContent = list[k].t;
+          li.appendChild(bar);
+          li.appendChild(name);
+          li.appendChild(t);
+          ul.appendChild(li);
+        }
+      }
+    }
+
+    renderDay(new Date());
+
+    var chip = document.getElementById("datechip");
+    var picker = document.getElementById("date-picker");
+    if(chip && picker){
+      chip.addEventListener("click", function(){ picker.showPicker ? picker.showPicker() : picker.click(); });
+      picker.addEventListener("change", function(){
+        if(picker.value){
+          var parts = picker.value.split("-");
+          var nd = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+          renderDay(nd);
+        }
+      });
     }
   }catch(e){ /* 保持页面可读 */ }
 })();
